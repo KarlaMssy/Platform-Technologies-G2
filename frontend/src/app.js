@@ -14,4 +14,6 @@ function App() {
   );
 }
 
+/** Quit starin at my code bruh, I just know it */
+
 export default App;
