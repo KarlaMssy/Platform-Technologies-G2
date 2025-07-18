@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './register.css';
+import { Link } from 'react-router-dom';
 
 export default function Register() {
   const [form, setForm] = useState({ username: '', password: '' });
@@ -16,14 +18,27 @@ export default function Register() {
   };
 
   return (
-    <form onSubmit={handleRegister}>
-      <h2>Register</h2>
-      <input type="text" placeholder="Username" value={form.username}
-        onChange={e => setForm({ ...form, username: e.target.value })} />
-      <input type="password" placeholder="Password" value={form.password}
-        onChange={e => setForm({ ...form, password: e.target.value })} />
-      <button type="submit">Register</button>
-      <p>{message}</p>
-    </form>
+    <div className="container">
+      <div className="nav-buttons">
+        <Link to="/login">Login</Link>
+        <Link to="/register">Register</Link>
+      </div>
+      <form onSubmit={handleRegister}>
+        <input
+          type="text"
+          placeholder="Username"
+          value={form.username}
+          onChange={e => setForm({ ...form, username: e.target.value })}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={e => setForm({ ...form, password: e.target.value })}
+        />
+        <button type="submit">Register</button>
+        {message && <p className="message">{message}</p>}
+      </form>
+    </div>
   );
 }

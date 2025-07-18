@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './Login.css';
+import { Link } from 'react-router-dom';
 
 export default function Login() {
   const [form, setForm] = useState({ username: '', password: '' });
@@ -17,15 +19,27 @@ export default function Login() {
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <h2>Login</h2>
-      <input type="text" placeholder="Username" value={form.username}
-        onChange={e => setForm({ ...form, username: e.target.value })} />
-      <input type="password" placeholder="Password" value={form.password}
-        onChange={e => setForm({ ...form, password: e.target.value })} />
-      <button type="submit">Login</button>
-      <p>{message}</p>
-    </form>
+    <div className="container">
+      <div className="nav-buttons">
+        <Link to="/login">Login</Link>
+        <Link to="/register">Register</Link>
+      </div>
+      <form onSubmit={handleLogin}>
+        <input
+          type="text"
+          placeholder="Username"
+          value={form.username}
+          onChange={e => setForm({ ...form, username: e.target.value })}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={e => setForm({ ...form, password: e.target.value })}
+        />
+        <button type="submit">Login</button>
+        {message && <p className="message">{message}</p>}
+      </form>
+    </div>
   );
 }
-
