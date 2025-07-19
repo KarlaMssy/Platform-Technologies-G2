@@ -2,40 +2,62 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
-const users = []; // In-memory user storage
+const db = require('../firebase-plattech');
 
 // Register endpoint
 router.post('/register', async (req, res) => {
   const { username, password } = req.body;
 
-  if (!username || !password)
-    return res.status(400).json({ message: 'All fields required' });
+  try {
+    const userRef = db.collection('users').doc(username);
+    const doc = await userRef.get();
 
-  const existingUser = users.find(u => u.username === username);
-  if (existingUser)
-    return res.status(409).json({ message: 'Username already exists' });
+    if (doc.exists) {
+      return res.status(400).json({ message: 'Username already exists' });
+    }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  users.push({ username, password: hashedPassword });
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  res.status(201).json({ message: 'User registered successfully' });
+    await userRef.set({ username, password: hashedPassword });
+
+    res.status(201).json({ message: 'User registered successfully' });
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
 });
+
 
 // Login endpoint
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const user = users.find(u => u.username === username);
 
-  if (!user)
-    return res.status(401).json({ message: 'Invalid username or password' });
+  try {
+    const userRef = db.collection('users').doc(username);
+    const doc = await userRef.get();
 
-  const isValid = await bcrypt.compare(password, user.password);
-  if (!isValid)
-    return res.status(401).json({ message: 'Invalid username or password' });
+    if (!doc.exists) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
 
-  const token = jwt.sign({ username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
-  res.json({ token });
+    const user = doc.data();
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ username }, process.env.JWT_SECRET, {
+      expiresIn: '1h'
+    });
+
+    res.status(200).json({ token });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
 });
 
 module.exports = router;
